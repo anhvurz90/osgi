@@ -83,3 +83,75 @@ Link: https://www.osgi.org/developer/resources/learning-resources-tutorials/tuto
 	start 2
   }
 }
+3.Dependencies between Bundles: {
+  - Movie.java: {
+	package osgitut.movies;
+ 
+	public class Movie {
+	    private final String title;
+	    private final String director;
+	 
+	    public Movie(String title, String director) {
+		this.title = title; this.director = director;
+	    }
+	    public String getTitle() { return title; }
+	    public String getDirector() { return director; }
+	}
+  }
+  - MovieFinder.java: {
+	package osgitut.movies;
+ 
+	public interface MovieFinder {
+	    Movie[] findAll();
+	}
+  }
+  - MoviesInterface.mf: {
+	Manifest-Version: 1.0
+	Bundle-ManifestVersion: 2
+	Bundle-Name: Movies Interface
+	Bundle-SymbolicName: MoviesInterface
+	Bundle-Version: 1.0.0
+	Export-Package: osgitut.movies;version="1.0.0"
+  }
+  - Compile & Build: {
+	> javac osgitut/movies/Movie.java osgitut/movies/MovieFinder.java
+	> jar -cfm MoviesInterface.jar MoviesInterface.mf osgitut/movies/*.class
+  }
+  - BasicMovieFinderImpl: {
+	package osgitut.movies.impl;
+ 
+	import osgitut.movies.*;
+	 
+	public class BasicMovieFinderImpl implements MovieFinder {
+	  private static final Movie[] MOVIES = new Movie[] {
+	    new Movie("The Godfather", "Francis Ford Coppola"),
+	    new Movie("Spirited Away", "Hayao Miyazaki")
+	  };
+	 
+	  public Movie[] findAll() { return MOVIES; }
+	}
+  }
+  - BasicMovieFinder.mf: {
+	Manifest-Version: 1.0
+	Bundle-ManifestVersion: 2
+	Bundle-Name: Basic Movie Finder
+	Bundle-SymbolicName: BasicMovieFinder
+	Bundle-Version: 1.0.0
+	Import-Package: osgitut.movies;version="[1.0.0,2.0.0)"
+	 
+  }	  
+  - Compile & Build: {
+	> javac -classpath MoviesInterface.jar osgitut/movies/impl/BasicMovieFinderImpl.java 
+	> jar -cfm BasicMovieFinder.jar BasicMovieFinder.mf osgitut/movies/impl/*.class
+  }
+  - install
+  - resolve: {
+	refresh 4
+  }  
+  - diagnostic: {
+	diag 4 --->
+		file:BasicMovieFinder.jar [4]
+		Missing imported package osgitut.movies_[1.0.0,2.0.0).
+  }
+  - so, need to install MoviesInterface.jar and then run "refresh 4"
+}
